@@ -138,6 +138,6 @@ See [docs/algorithm_description.md](docs/algorithm_description.md) for full tech
 ## About
 
 **Matanat Saadat Rouhi** — ML Engineer · Medical Imaging · Computer Vision · HPC  
-M.Sc. Computer Simulation in Science · Bergische Universität Wuppertal · Graduating September 2026
+M.Sc. Computer Simulation in Science · Bergische Universität Wuppertal 
 
 [LinkedIn](https://linkedin.com/in/metanat-saadat-rouhi) · [GitHub](https://github.com/Metanat-Saadat-Rouhi) · [metanat.saadat@gmail.com](mailto:metanat.saadat@gmail.com)
