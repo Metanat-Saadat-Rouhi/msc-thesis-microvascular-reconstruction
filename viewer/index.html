@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3-D Microvascular Network — Matanat Saadat Rouhi</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #06101e;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #e0eaf8;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  #canvas-container {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* ── Top bar ── */
+  #topbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 14px 24px;
+    background: linear-gradient(180deg, rgba(6,16,30,0.97) 0%, rgba(6,16,30,0.0) 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  #topbar-left h1 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+  }
+  #topbar-left p {
+    font-size: 11px;
+    color: #7AAADD;
+    margin-top: 3px;
+  }
+
+  #topbar-right {
+    text-align: right;
+    font-size: 10.5px;
+    color: #5a8abf;
+    line-height: 1.7;
+    pointer-events: auto;
+  }
+  #topbar-right a {
+    color: #7dc4ff;
+    text-decoration: none;
+  }
+  #topbar-right a:hover { text-decoration: underline; }
+
+  /* ── Stats panel ── */
+  #stats {
+    position: absolute;
+    bottom: 80px; left: 20px;
+    background: rgba(6,16,30,0.85);
+    border: 1px solid rgba(60,110,190,0.4);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 11px;
+    line-height: 2.1;
+    min-width: 200px;
+    z-index: 10;
+    backdrop-filter: blur(6px);
+  }
+  #stats h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #7AAADD;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(60,110,190,0.3);
+    padding-bottom: 5px;
+  }
+  .stat-row { display: flex; justify-content: space-between; gap: 20px; }
+  .stat-val { color: #4ECDC4; font-weight: 700; font-size: 13px; }
+  .stat-key { color: #8aabcc; }
+
+  /* ── Controls panel ── */
+  #controls {
+    position: absolute;
+    bottom: 80px; right: 20px;
+    background: rgba(6,16,30,0.85);
+    border: 1px solid rgba(60,110,190,0.4);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 11px;
+    z-index: 10;
+    backdrop-filter: blur(6px);
+    line-height: 2.1;
+  }
+  #controls h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #7AAADD;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(60,110,190,0.3);
+    padding-bottom: 5px;
+  }
+  #controls .key { color: #4ECDC4; font-weight: 600; }
+
+  /* ── Bottom bar ── */
+  #bottombar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 24px;
+    background: linear-gradient(0deg, rgba(6,16,30,0.97) 0%, rgba(6,16,30,0.0) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .badge {
+    text-align: center;
+    font-size: 10px;
+    color: #5a8abf;
+  }
+  .badge .num {
+    display: block;
+    font-size: 20px;
+    font-weight: 800;
+    color: #4ECDC4;
+    line-height: 1.2;
+  }
+
+  /* ── Buttons ── */
+  #btn-row {
+    position: absolute;
+    bottom: 60px; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+  }
+  .btn {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(78,205,196,0.5);
+    background: rgba(6,16,30,0.8);
+    color: #4ECDC4;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .btn:hover {
+    background: rgba(78,205,196,0.15);
+    border-color: #4ECDC4;
+  }
+  .btn.active {
+    background: rgba(78,205,196,0.2);
+    border-color: #4ECDC4;
+  }
+
+  /* ── Loading ── */
+  #loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #06101e;
+    z-index: 100;
+  }
+  #loading h2 { font-size: 15px; color: #7AAADD; margin-bottom: 12px; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(78,205,196,0.2);
+    border-top-color: #4ECDC4;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #demo-badge {
+    position: absolute;
+    top: 60px; right: 20px;
+    background: rgba(255,180,0,0.15);
+    border: 1px solid rgba(255,180,0,0.4);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 9.5px;
+    color: #ffc947;
+    z-index: 10;
+    max-width: 200px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <h2>Loading vascular network…</h2>
+  <div class="spinner"></div>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- Top bar -->
+<div id="topbar">
+  <div id="topbar-left">
+    <h1>3-D Microvascular Network Reconstruction</h1>
+    <p>M.Sc. Thesis · Forschungszentrum Jülich / Bergische Universität Wuppertal</p>
+  </div>
+  <div id="topbar-right">
+    <strong>Matanat Saadat Rouhi</strong><br>
+    <a href="https://linkedin.com/in/metanat-saadat-rouhi" target="_blank">LinkedIn</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/Metanat-Saadat-Rouhi" target="_blank">GitHub</a>
+    &nbsp;·&nbsp;
+    <a href="mailto:metanat.saadat@gmail.com">Contact</a>
+  </div>
+</div>
+
+<!-- Demo badge -->
+<div id="demo-badge">
+  ⚡ Demo network — representative geometry.<br>
+  Actual thesis: 100,000+ connections.
+</div>
+
+<!-- Stats -->
+<div id="stats">
+  <h3>Network Metrics</h3>
+  <div class="stat-row"><span class="stat-key">Integration rate</span><span class="stat-val">92.4 %</span></div>
+  <div class="stat-row"><span class="stat-key">Connections</span><span class="stat-val">100,000+</span></div>
+  <div class="stat-row"><span class="stat-key">Branching degree</span><span class="stat-val">3.26</span></div>
+  <div class="stat-row"><span class="stat-key">HPC nodes</span><span class="stat-val">Multi-GPU</span></div>
+  <div class="stat-row"><span class="stat-key">Algorithm</span><span class="stat-val">KD-Tree</span></div>
+</div>
+
+<!-- Controls -->
+<div id="controls">
+  <h3>Controls</h3>
+  <div><span class="key">Drag</span> — Rotate</div>
+  <div><span class="key">Scroll</span> — Zoom</div>
+  <div><span class="key">Right drag</span> — Pan</div>
+  <div><span class="key">Buttons</span> — Toggle view</div>
+</div>
+
+<!-- Buttons -->
+<div id="btn-row">
+  <button class="btn active" id="btn-rotate">⟳ Auto-rotate</button>
+  <button class="btn" id="btn-color">🎨 Colour by depth</button>
+  <button class="btn" id="btn-radius">📏 Show radius</button>
+  <button class="btn" id="btn-reset">⌖ Reset view</button>
+</div>
+
+<!-- Bottom badges -->
+<div id="bottombar">
+  <div class="badge"><span class="num">92.4%</span>Integration Rate</div>
+  <div class="badge"><span class="num">100k+</span>Vessel Connections</div>
+  <div class="badge"><span class="num">3.26</span>Branching Degree</div>
+  <div class="badge"><span class="num">15×</span>GPU Speedup</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────
+let autoRotate = true;
+let colorByDepth = false;
+let showRadius = false;
+let networkGroup = null;
+
+// ── Scene setup ────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+const W = () => window.innerWidth;
+const H = () => window.innerHeight;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(W(), H());
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x06101e);
+scene.fog = new THREE.FogExp2(0x06101e, 0.045);
+
+const camera = new THREE.PerspectiveCamera(55, W()/H(), 0.01, 500);
+camera.position.set(0, 3, 18);
+camera.lookAt(0, 0, 0);
+
+// Lights
+const ambient = new THREE.AmbientLight(0x4488ff, 0.4);
+scene.add(ambient);
+const point1 = new THREE.PointLight(0x4ecdc4, 2, 40);
+point1.position.set(5, 8, 5);
+scene.add(point1);
+const point2 = new THREE.PointLight(0x2255aa, 1.5, 40);
+point2.position.set(-5, -5, 8);
+scene.add(point2);
+const point3 = new THREE.PointLight(0xff6b6b, 0.8, 30);
+point3.position.set(0, 10, -5);
+scene.add(point3);
+
+// Stars background
+const starGeo = new THREE.BufferGeometry();
+const starVerts = [];
+for (let i = 0; i < 2000; i++) {
+  starVerts.push(
+    (Math.random()-0.5)*200,
+    (Math.random()-0.5)*200,
+    (Math.random()-0.5)*200
+  );
+}
+starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVerts, 3));
+const starMat = new THREE.PointsMaterial({ color: 0x334466, size: 0.15, sizeAttenuation: true });
+scene.add(new THREE.Points(starGeo, starMat));
+
+// ── Orbit controls (manual implementation) ────────────────────
+let isDragging = false, isRightDrag = false;
+let prevMouse = { x: 0, y: 0 };
+let spherical = { theta: 0, phi: Math.PI/2.5, r: 18 };
+let panOffset = new THREE.Vector3();
+
+renderer.domElement.addEventListener('mousedown', e => {
+  isDragging = true;
+  isRightDrag = e.button === 2;
+  prevMouse = { x: e.clientX, y: e.clientY };
+  autoRotate = false;
+  document.getElementById('btn-rotate').classList.remove('active');
+});
+renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('mouseup', () => { isDragging = false; });
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - prevMouse.x;
+  const dy = e.clientY - prevMouse.y;
+  prevMouse = { x: e.clientX, y: e.clientY };
+  if (isRightDrag) {
+    panOffset.x -= dx * 0.01;
+    panOffset.y += dy * 0.01;
+  } else {
+    spherical.theta -= dx * 0.005;
+    spherical.phi = Math.max(0.1, Math.min(Math.PI-0.1, spherical.phi + dy * 0.005));
+  }
+});
+renderer.domElement.addEventListener('wheel', e => {
+  spherical.r = Math.max(2, Math.min(60, spherical.r + e.deltaY * 0.02));
+});
+
+function updateCamera() {
+  const x = spherical.r * Math.sin(spherical.phi) * Math.sin(spherical.theta);
+  const y = spherical.r * Math.cos(spherical.phi);
+  const z = spherical.r * Math.sin(spherical.phi) * Math.cos(spherical.theta);
+  camera.position.set(x + panOffset.x, y + panOffset.y, z);
+  camera.lookAt(panOffset);
+}
+
+// ── Build network geometry ─────────────────────────────────────
+function depthColor(depth, maxDepth) {
+  // arterial red → capillary teal
+  const t = depth / maxDepth;
+  const r = Math.round(255 * (1 - t * 0.6));
+  const g = Math.round(100 + t * 100);
+  const b = Math.round(100 + t * 156);
+  return new THREE.Color(r/255, g/255, b/255);
+}
+
+function buildNetwork(data, useDepthColor, useRadius) {
+  const group = new THREE.Group();
+
+  // Build adjacency for depth computation
+  const adj = {};
+  data.nodes.forEach(n => { adj[n.id] = []; });
+  data.edges.forEach(e => {
+    if (adj[e.source]) adj[e.source].push(e.target);
+    if (adj[e.target]) adj[e.target].push(e.source);
+  });
+
+  // BFS from node 0 for depth
+  const depth = {};
+  const queue = [0];
+  depth[0] = 0;
+  let maxDepth = 1;
+  while (queue.length) {
+    const cur = queue.shift();
+    (adj[cur] || []).forEach(nb => {
+      if (depth[nb] === undefined) {
+        depth[nb] = depth[cur] + 1;
+        maxDepth = Math.max(maxDepth, depth[nb]);
+        queue.push(nb);
+      }
+    });
+  }
+
+  // Node lookup
+  const nodePos = {};
+  data.nodes.forEach(n => {
+    nodePos[n.id] = new THREE.Vector3(n.x, n.y, n.z);
+  });
+
+  // Draw edges as cylinders or lines
+  data.edges.forEach(e => {
+    const a = nodePos[e.source];
+    const b = nodePos[e.target];
+    if (!a || !b) return;
+
+    const d = depth[e.source] !== undefined ? depth[e.source] : 0;
+    const col = useDepthColor
+      ? depthColor(d, maxDepth)
+      : new THREE.Color(0x4ecdc4);
+
+    if (useRadius) {
+      // Cylinders — show actual vessel radius
+      const r = Math.max(0.012, e.r * 0.08);
+      const dir = new THREE.Vector3().subVectors(b, a);
+      const len = dir.length();
+      if (len < 0.001) return;
+      const geo = new THREE.CylinderGeometry(r, r * 0.92, len, 5, 1);
+      const mat = new THREE.MeshPhongMaterial({
+        color: col,
+        emissive: col.clone().multiplyScalar(0.3),
+        shininess: 80,
+        transparent: true,
+        opacity: 0.92
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      const mid = new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5);
+      mesh.position.copy(mid);
+      mesh.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0,1,0),
+        dir.normalize()
+      );
+      group.add(mesh);
+    } else {
+      // Lines — fast, good default
+      const geo = new THREE.BufferGeometry().setFromPoints([a, b]);
+      const mat = new THREE.LineBasicMaterial({
+        color: col,
+        transparent: true,
+        opacity: 0.75,
+        linewidth: 1
+      });
+      group.add(new THREE.Line(geo, mat));
+    }
+  });
+
+  // Node spheres at branch points (degree > 2)
+  const deg = {};
+  data.edges.forEach(e => {
+    deg[e.source] = (deg[e.source]||0) + 1;
+    deg[e.target] = (deg[e.target]||0) + 1;
+  });
+  const sphereGeo = new THREE.SphereGeometry(0.06, 6, 6);
+  data.nodes.forEach(n => {
+    if ((deg[n.id]||0) >= 3) {
+      const d = depth[n.id] !== undefined ? depth[n.id] : 0;
+      const col = useDepthColor ? depthColor(d, maxDepth) : new THREE.Color(0xffd700);
+      const mat = new THREE.MeshPhongMaterial({
+        color: col,
+        emissive: col.clone().multiplyScalar(0.5),
+        shininess: 120
+      });
+      const sphere = new THREE.Mesh(sphereGeo, mat);
+      sphere.position.set(n.x, n.y, n.z);
+      sphere.scale.setScalar(Math.max(0.5, (n.r||1) * 0.12));
+      group.add(sphere);
+    }
+  });
+
+  return group;
+}
+
+// ── Load data and initialise ───────────────────────────────────
+let networkData = null;
+
+fetch('vascular_data.json')
+  .then(r => r.json())
+  .then(data => {
+    networkData = data;
+    networkGroup = buildNetwork(data, false, false);
+    scene.add(networkGroup);
+    document.getElementById('loading').style.display = 'none';
+    animate();
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById('loading').innerHTML =
+      '<h2 style="color:#ff6b6b">Could not load vascular_data.json</h2>' +
+      '<p style="color:#7AAADD;font-size:12px;margin-top:8px">Make sure vascular_data.json is in the same folder as this HTML file.</p>';
+  });
+
+// ── Rebuild on toggle ──────────────────────────────────────────
+function rebuild() {
+  if (!networkData) return;
+  if (networkGroup) scene.remove(networkGroup);
+  networkGroup = buildNetwork(networkData, colorByDepth, showRadius);
+  scene.add(networkGroup);
+}
+
+document.getElementById('btn-rotate').addEventListener('click', () => {
+  autoRotate = !autoRotate;
+  document.getElementById('btn-rotate').classList.toggle('active', autoRotate);
+});
+document.getElementById('btn-color').addEventListener('click', () => {
+  colorByDepth = !colorByDepth;
+  document.getElementById('btn-color').classList.toggle('active', colorByDepth);
+  rebuild();
+});
+document.getElementById('btn-radius').addEventListener('click', () => {
+  showRadius = !showRadius;
+  document.getElementById('btn-radius').classList.toggle('active', showRadius);
+  rebuild();
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  spherical = { theta: 0, phi: Math.PI/2.5, r: 18 };
+  panOffset.set(0,0,0);
+  autoRotate = true;
+  document.getElementById('btn-rotate').classList.add('active');
+});
+
+// ── Resize ─────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = W()/H();
+  camera.updateProjectionMatrix();
+  renderer.setSize(W(), H());
+});
+
+// ── Render loop ────────────────────────────────────────────────
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+  if (autoRotate) {
+    spherical.theta += 0.003;
+  }
+  // Pulse lights
+  point1.intensity = 1.8 + Math.sin(t * 0.7) * 0.4;
+  point2.intensity = 1.2 + Math.sin(t * 0.5 + 1) * 0.3;
+
+  updateCamera();
+  renderer.render(scene, camera);
+}
+</script>
+</body>
+</html>

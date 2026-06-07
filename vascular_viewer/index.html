@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3-D Microvascular Network — Matanat Saadat Rouhi</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+      --navy:   #0B1F3A;
+      --blue:   #1B3A6B;
+      --accent: #00C9B1;
+      --accent2:#3A7BFF;
+      --glass:  rgba(255,255,255,0.04);
+      --border: rgba(0,201,177,0.18);
+      --text:   #E8F0FE;
+      --muted:  #7A9CC0;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: var(--navy);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* ── canvas ── */
+    #c {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    /* ── top bar ── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 10;
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(180deg, rgba(11,31,58,0.95) 0%, transparent 100%);
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .logo-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .logo-sub {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .header-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .header-links a {
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color .2s;
+    }
+    .header-links a:hover { color: var(--accent); }
+
+    /* ── stat chips ── */
+    .stats {
+      position: fixed;
+      top: 70px;
+      left: 28px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stat {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 160px;
+    }
+    .stat-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* ── bottom info panel ── */
+    .panel {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      border-radius: 12px;
+      padding: 14px 28px;
+      display: flex;
+      gap: 40px;
+      align-items: center;
+    }
+    .panel-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .panel-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 15px;
+      color: var(--accent2);
+      font-weight: 700;
+    }
+    .panel-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .panel-divider {
+      width: 1px;
+      height: 36px;
+      background: var(--border);
+    }
+
+    /* ── controls hint ── */
+    .controls {
+      position: fixed;
+      bottom: 24px;
+      right: 28px;
+      z-index: 10;
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.9;
+      letter-spacing: 0.04em;
+      text-align: right;
+    }
+    .controls kbd {
+      font-family: 'Space Mono', monospace;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 9px;
+    }
+
+    /* ── upload overlay ── */
+    #upload-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(11,31,58,0.92);
+      backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      transition: opacity .4s;
+    }
+    #upload-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .upload-box {
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      padding: 48px 60px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      max-width: 480px;
+      width: 90%;
+    }
+    .upload-box:hover {
+      border-color: var(--accent);
+      background: rgba(0,201,177,0.05);
+    }
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.7;
+    }
+    .upload-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 15px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .upload-sub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .upload-sub strong { color: var(--text); }
+    .upload-input { display: none; }
+
+    .btn-demo {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      padding: 10px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: all .2s;
+    }
+    .btn-demo:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .upload-note {
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0.7;
+      text-align: center;
+      max-width: 380px;
+    }
+
+    /* ── loading ── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      transition: opacity .5s;
+    }
+    #loading.hidden { opacity:0; pointer-events:none; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 2px solid rgba(0,201,177,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── author tag ── */
+    .author {
+      position: fixed;
+      top: 70px;
+      right: 28px;
+      z-index: 10;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      line-height: 1.7;
+    }
+    .author a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text">INITIALISING VIEWER</div>
+</div>
+
+<!-- Upload overlay -->
+<div id="upload-overlay">
+  <div class="upload-box" id="drop-zone">
+    <div class="upload-icon">🫀</div>
+    <div class="upload-title">Load Your Mesh File</div>
+    <div class="upload-sub">
+      Drop your <strong>.obj</strong>, <strong>.ply</strong>, or <strong>.stl</strong> file here<br/>
+      exported from MeshLab · no data leaves your browser
+    </div>
+    <input type="file" id="file-input" class="upload-input" accept=".obj,.ply,.stl"/>
+  </div>
+  <button class="btn-demo" id="demo-btn">View demo reconstruction instead</button>
+  <div class="upload-note">
+    ⚠️ Your mesh file is loaded locally and never uploaded anywhere.<br/>
+    Safe to use with thesis data.
+  </div>
+</div>
+
+<!-- UI -->
+<canvas id="c"></canvas>
+
+<header>
+  <div class="logo">
+    <div class="logo-title">Microvascular Network · 3-D Viewer</div>
+    <div class="logo-sub">M.Sc. Thesis · Bergische Universität Wuppertal / Forschungszentrum Jülich</div>
+  </div>
+  <div class="header-links">
+    <a href="https://github.com/Metanat-Saadat-Rouhi/msc-thesis-microvascular-reconstruction" target="_blank">GitHub</a>
+    <a href="https://linkedin.com/in/metanat-saadat-rouhi" target="_blank">LinkedIn</a>
+    <a href="mailto:metanat.saadat@gmail.com">Contact</a>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-val">92.4%</div>
+    <div class="stat-label">Network Integration</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val">100K+</div>
+    <div class="stat-label">Vascular Connections</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val">3.26</div>
+    <div class="stat-label">Mean Branching Degree</div>
+  </div>
+</div>
+
+<div class="author">
+  Matanat Saadat Rouhi<br/>
+  <a href="mailto:metanat.saadat@gmail.com">metanat.saadat@gmail.com</a>
+</div>
+
+<div class="panel">
+  <div class="panel-item">
+    <div class="panel-val" id="node-count">—</div>
+    <div class="panel-label">Vertices</div>
+  </div>
+  <div class="panel-divider"></div>
+  <div class="panel-item">
+    <div class="panel-val" id="edge-count">—</div>
+    <div class="panel-label">Triangles</div>
+  </div>
+  <div class="panel-divider"></div>
+  <div class="panel-item">
+    <div class="panel-val" id="model-label">Demo</div>
+    <div class="panel-label">Source</div>
+  </div>
+</div>
+
+<div class="controls">
+  <kbd>drag</kbd> Rotate &nbsp;<kbd>scroll</kbd> Zoom &nbsp;<kbd>right-drag</kbd> Pan<br/>
+  <kbd>R</kbd> Reset view &nbsp;<kbd>A</kbd> Auto-rotate
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── Three.js setup ──────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x0B1F3A, 1);
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.01, 1000);
+camera.position.set(0, 0, 5);
+
+// Fog for depth
+scene.fog = new THREE.FogExp2(0x0B1F3A, 0.08);
+
+// Lights
+const amb = new THREE.AmbientLight(0x1B3A6B, 1.2);
+scene.add(amb);
+const dir1 = new THREE.DirectionalLight(0x00C9B1, 2.5);
+dir1.position.set(5, 8, 5);
+scene.add(dir1);
+const dir2 = new THREE.DirectionalLight(0x3A7BFF, 1.5);
+dir2.position.set(-5, -3, -5);
+scene.add(dir2);
+const point1 = new THREE.PointLight(0x00C9B1, 3, 20);
+point1.position.set(0, 3, 3);
+scene.add(point1);
+
+// ── Orbit controls (manual implementation) ─────────────────────
+let isDragging = false, isRightDrag = false;
+let prevMouse = { x: 0, y: 0 };
+let spherical = { theta: 0.3, phi: 1.2, radius: 5 };
+let pan = new THREE.Vector3(0, 0, 0);
+let autoRotate = true;
+
+function updateCamera() {
+  const x = spherical.radius * Math.sin(spherical.phi) * Math.sin(spherical.theta);
+  const y = spherical.radius * Math.cos(spherical.phi);
+  const z = spherical.radius * Math.sin(spherical.phi) * Math.cos(spherical.theta);
+  camera.position.set(x + pan.x, y + pan.y, z + pan.z);
+  camera.lookAt(pan);
+}
+
+canvas.addEventListener('mousedown', e => {
+  isDragging = true;
+  isRightDrag = e.button === 2;
+  prevMouse = { x: e.clientX, y: e.clientY };
+  autoRotate = false;
+});
+window.addEventListener('mouseup', () => { isDragging = false; });
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - prevMouse.x;
+  const dy = e.clientY - prevMouse.y;
+  if (isRightDrag) {
+    const right = new THREE.Vector3();
+    const up = new THREE.Vector3();
+    camera.getWorldDirection(new THREE.Vector3());
+    right.crossVectors(camera.getWorldDirection(new THREE.Vector3()), camera.up).normalize();
+    up.copy(camera.up).normalize();
+    pan.addScaledVector(right, -dx * 0.004);
+    pan.addScaledVector(up, dy * 0.004);
+  } else {
+    spherical.theta -= dx * 0.007;
+    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi + dy * 0.007));
+  }
+  prevMouse = { x: e.clientX, y: e.clientY };
+  updateCamera();
+});
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('wheel', e => {
+  spherical.radius = Math.max(0.5, Math.min(50, spherical.radius + e.deltaY * 0.005));
+  updateCamera();
+  autoRotate = false;
+});
+window.addEventListener('keydown', e => {
+  if (e.key === 'r' || e.key === 'R') {
+    spherical = { theta: 0.3, phi: 1.2, radius: 5 };
+    pan.set(0, 0, 0); autoRotate = true; updateCamera();
+  }
+  if (e.key === 'a' || e.key === 'A') autoRotate = !autoRotate;
+});
+
+// Touch support
+let lastTouch = null;
+canvas.addEventListener('touchstart', e => {
+  lastTouch = e.touches[0];
+  autoRotate = false;
+});
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const dx = t.clientX - lastTouch.clientX;
+  const dy = t.clientY - lastTouch.clientY;
+  spherical.theta -= dx * 0.007;
+  spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi + dy * 0.007));
+  lastTouch = t;
+  updateCamera();
+}, { passive: false });
+
+// Resize
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// ── Demo vascular network generator ────────────────────────────
+function generateVascularNetwork() {
+  const group = new THREE.Group();
+
+  // Material — teal-glowing tubes
+  const vesselMat = new THREE.MeshPhongMaterial({
+    color: 0x00C9B1,
+    emissive: 0x003D36,
+    specular: 0x88FFEE,
+    shininess: 80,
+    transparent: true,
+    opacity: 0.92
+  });
+  const capMat = new THREE.MeshPhongMaterial({
+    color: 0x3A7BFF,
+    emissive: 0x0A1540,
+    specular: 0xAABBFF,
+    shininess: 60,
+    transparent: true,
+    opacity: 0.75
+  });
+
+  // Recursive branching tree
+  function addBranch(start, dir, len, radius, depth, mat) {
+    if (depth <= 0 || len < 0.02) return;
+    const end = start.clone().addScaledVector(dir, len);
+    // Add slight organic curve
+    const mid = start.clone().lerp(end, 0.5);
+    mid.x += (Math.random() - 0.5) * len * 0.3;
+    mid.y += (Math.random() - 0.5) * len * 0.3;
+    mid.z += (Math.random() - 0.5) * len * 0.3;
+
+    // Tube along path
+    const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+    const tubeGeo = new THREE.TubeGeometry(curve, 8, radius, 6, false);
+    group.add(new THREE.Mesh(tubeGeo, mat));
+
+    // Sphere at node
+    if (depth > 1) {
+      const nodeGeo = new THREE.SphereGeometry(radius * 1.3, 8, 8);
+      const nodeMesh = new THREE.Mesh(nodeGeo, mat);
+      nodeMesh.position.copy(end);
+      group.add(nodeMesh);
+    }
+
+    const branches = depth > 2 ? 3 : 2;
+    for (let i = 0; i < branches; i++) {
+      const angle = (i / branches) * Math.PI * 2 + Math.random() * 0.4;
+      const tilt  = 0.4 + Math.random() * 0.5;
+      const newDir = new THREE.Vector3(
+        dir.x * Math.cos(tilt) + Math.cos(angle) * Math.sin(tilt),
+        dir.y * Math.cos(tilt) + Math.sin(angle) * Math.sin(tilt) * 0.5,
+        dir.z * Math.cos(tilt) + Math.sin(tilt) * 0.3
+      ).normalize();
+      const childMat = depth <= 2 ? capMat : mat;
+      addBranch(end, newDir, len * (0.55 + Math.random() * 0.15),
+                radius * 0.62, depth - 1, childMat);
+    }
+  }
+
+  // Multiple root vessels
+  const roots = [
+    { pos: new THREE.Vector3(-1.2, -1.5, 0),    dir: new THREE.Vector3(0.1, 1, 0.1).normalize(),   r: 0.045 },
+    { pos: new THREE.Vector3(1.0, -1.5, 0.2),   dir: new THREE.Vector3(-0.1, 1, 0.05).normalize(),  r: 0.038 },
+    { pos: new THREE.Vector3(0, -1.5, -0.8),     dir: new THREE.Vector3(0.05, 1, 0.15).normalize(), r: 0.042 },
+    { pos: new THREE.Vector3(-0.4, -1.5, 0.9),  dir: new THREE.Vector3(0.08, 1, -0.1).normalize(),  r: 0.035 },
+  ];
+  roots.forEach(r => addBranch(r.pos, r.dir, 0.7, r.r, 6, vesselMat));
+
+  // Centre and scale
+  const box = new THREE.Box3().setFromObject(group);
+  const centre = box.getCenter(new THREE.Vector3());
+  const size   = box.getSize(new THREE.Vector3()).length();
+  group.position.sub(centre);
+  const scale  = 3.5 / size;
+  group.scale.setScalar(scale);
+
+  // Count geometry for stats
+  let verts = 0, tris = 0;
+  group.traverse(child => {
+    if (child.isMesh && child.geometry) {
+      const pos = child.geometry.attributes.position;
+      if (pos) verts += pos.count;
+      const idx = child.geometry.index;
+      tris += idx ? idx.count / 3 : pos ? pos.count / 3 : 0;
+    }
+  });
+  document.getElementById('node-count').textContent = verts.toLocaleString();
+  document.getElementById('edge-count').textContent = Math.round(tris).toLocaleString();
+  document.getElementById('model-label').textContent = 'Demo';
+
+  return group;
+}
+
+// ── OBJ parser ─────────────────────────────────────────────────
+function parseOBJ(text) {
+  const positions = [];
+  const indices   = [];
+  const lines = text.split('\n');
+  for (const line of lines) {
+    const parts = line.trim().split(/\s+/);
+    if (parts[0] === 'v') {
+      positions.push(parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3]));
+    } else if (parts[0] === 'f') {
+      const verts = parts.slice(1).map(p => parseInt(p.split('/')[0]) - 1);
+      for (let i = 1; i < verts.length - 1; i++) {
+        indices.push(verts[0], verts[i], verts[i+1]);
+      }
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  if (indices.length) geo.setIndex(indices);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+// ── PLY parser (ASCII only) ─────────────────────────────────────
+function parsePLY(text) {
+  const lines = text.split('\n');
+  let vertCount = 0, faceCount = 0, headerEnd = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim();
+    if (l.startsWith('element vertex')) vertCount = parseInt(l.split(' ')[2]);
+    if (l.startsWith('element face'))   faceCount = parseInt(l.split(' ')[2]);
+    if (l === 'end_header') { headerEnd = i + 1; break; }
+  }
+  const positions = [];
+  for (let i = headerEnd; i < headerEnd + vertCount; i++) {
+    const p = lines[i].trim().split(/\s+/);
+    positions.push(parseFloat(p[0]), parseFloat(p[1]), parseFloat(p[2]));
+  }
+  const indices = [];
+  for (let i = headerEnd + vertCount; i < headerEnd + vertCount + faceCount; i++) {
+    const p = lines[i].trim().split(/\s+/);
+    const n = parseInt(p[0]);
+    for (let j = 1; j < n - 1; j++) indices.push(parseInt(p[1]), parseInt(p[1+j]), parseInt(p[2+j]));
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  if (indices.length) geo.setIndex(indices);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+// ── Load mesh into scene ────────────────────────────────────────
+let currentMesh = null;
+function loadGeometry(geo, label) {
+  if (currentMesh) scene.remove(currentMesh);
+
+  const mat = new THREE.MeshPhongMaterial({
+    color: 0x00C9B1,
+    emissive: 0x003D36,
+    specular: 0xAAFFEE,
+    shininess: 70,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.9
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+
+  // Centre + scale
+  geo.computeBoundingBox();
+  const box    = geo.boundingBox;
+  const centre = new THREE.Vector3();
+  box.getCenter(centre);
+  const size   = box.getSize(new THREE.Vector3()).length();
+  mesh.position.sub(centre);
+  mesh.scale.setScalar(3.5 / size);
+
+  scene.add(mesh);
+  currentMesh = mesh;
+
+  const verts = geo.attributes.position.count;
+  const tris  = geo.index ? geo.index.count / 3 : verts / 3;
+  document.getElementById('node-count').textContent = verts.toLocaleString();
+  document.getElementById('edge-count').textContent = Math.round(tris).toLocaleString();
+  document.getElementById('model-label').textContent = label || 'Mesh';
+}
+
+// ── Show demo ───────────────────────────────────────────────────
+function showDemo() {
+  if (currentMesh) scene.remove(currentMesh);
+  const group = generateVascularNetwork();
+  scene.add(group);
+  currentMesh = group;
+  document.getElementById('upload-overlay').classList.add('hidden');
+}
+
+// ── File handling ───────────────────────────────────────────────
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    const name = file.name.toLowerCase();
+    let geo;
+    try {
+      if (name.endsWith('.obj')) geo = parseOBJ(text);
+      else if (name.endsWith('.ply')) geo = parsePLY(text);
+      else { alert('Please use .obj or .ply (ASCII) files'); return; }
+      loadGeometry(geo, file.name);
+      document.getElementById('upload-overlay').classList.add('hidden');
+    } catch(err) {
+      alert('Could not parse file. Make sure it is an ASCII .obj or .ply file exported from MeshLab.');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('file-input').addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+document.getElementById('drop-zone').addEventListener('click', () => {
+  document.getElementById('file-input').click();
+});
+document.getElementById('drop-zone').addEventListener('dragover', e => {
+  e.preventDefault();
+  document.getElementById('drop-zone').style.borderColor = 'var(--accent)';
+});
+document.getElementById('drop-zone').addEventListener('drop', e => {
+  e.preventDefault();
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+document.getElementById('demo-btn').addEventListener('click', showDemo);
+
+// ── Background particles ────────────────────────────────────────
+function addParticles() {
+  const geo = new THREE.BufferGeometry();
+  const count = 800;
+  const pos = new Float32Array(count * 3);
+  for (let i = 0; i < count * 3; i++) pos[i] = (Math.random() - 0.5) * 30;
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const mat = new THREE.PointsMaterial({ color: 0x3A7BFF, size: 0.03, transparent: true, opacity: 0.4 });
+  scene.add(new THREE.Points(geo, mat));
+}
+addParticles();
+
+// ── Animation loop ──────────────────────────────────────────────
+updateCamera();
+let t = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  t += 0.005;
+  if (autoRotate) {
+    spherical.theta += 0.003;
+    updateCamera();
+  }
+  // Pulse the lights
+  point1.intensity = 3 + Math.sin(t * 1.5) * 0.8;
+  renderer.render(scene, camera);
+}
+animate();
+
+// Hide loading
+setTimeout(() => {
+  document.getElementById('loading').classList.add('hidden');
+}, 800);
+</script>
+</body>
+</html>

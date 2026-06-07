@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" width="900" height="640" font-family="Arial, Helvetica, sans-serif">
+
+  <!-- Background -->
+  <rect width="900" height="640" fill="#F8FAFD" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" font-size="17" font-weight="bold" fill="#1B3A6B">
+    HPC-Accelerated 3-D Microvascular Reconstruction Pipeline
+  </text>
+  <text x="450" y="58" text-anchor="middle" font-size="11" fill="#888">
+    M.Sc. Thesis · Matanat Saadat Rouhi · Bergische Universität Wuppertal / Forschungszentrum Jülich
+  </text>
+
+  <!-- ── Input box ── -->
+  <rect x="310" y="80" width="280" height="64" rx="10" fill="#1B3A6B"/>
+  <text x="450" y="105" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Gigapixel Histological</text>
+  <text x="450" y="123" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Image Stack</text>
+  <text x="450" y="139" text-anchor="middle" font-size="10" fill="#AAC4E8">Multi-GB · NIfTI / TIFF format</text>
+
+  <!-- Arrow 1 -->
+  <line x1="450" y1="144" x2="450" y2="168" stroke="#2E5FA3" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Step 1 -->
+  <rect x="270" y="168" width="360" height="62" rx="8" fill="#2E5FA3"/>
+  <text x="450" y="191" text-anchor="middle" font-size="12" font-weight="bold" fill="white">① Tiled Image Ingestion</text>
+  <text x="450" y="208" text-anchor="middle" font-size="10" fill="#CCE0FF">Memory-safe tiling of multi-GB volumes</text>
+  <text x="450" y="222" text-anchor="middle" font-size="10" fill="#CCE0FF">Overlap margins to avoid border artefacts</text>
+
+  <!-- Arrow 2 -->
+  <line x1="450" y1="230" x2="450" y2="254" stroke="#2E5FA3" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Step 2 — HPC highlight -->
+  <rect x="230" y="254" width="440" height="72" rx="8" fill="#0D6E6E"/>
+  <text x="450" y="277" text-anchor="middle" font-size="12" font-weight="bold" fill="white">② 3-D U-Net Segmentation</text>
+  <text x="450" y="295" text-anchor="middle" font-size="10" fill="#A8EFEF">Multi-GPU parallelised training &amp; inference · Slurm (Pleiades HPC)</text>
+  <text x="450" y="311" text-anchor="middle" font-size="10" fill="#A8EFEF">Patch-based · Mixed precision (FP16) · DistributedDataParallel</text>
+  <!-- HPC badge -->
+  <rect x="754" y="262" width="110" height="24" rx="6" fill="#0A4D4D"/>
+  <text x="809" y="279" text-anchor="middle" font-size="9" font-weight="bold" fill="#5FFFFF">HPC · Multi-GPU</text>
+
+  <!-- Arrow 3 -->
+  <line x1="450" y1="326" x2="450" y2="350" stroke="#2E5FA3" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Step 3 — Novel contribution highlight -->
+  <rect x="230" y="350" width="440" height="72" rx="8" fill="#1B3A6B" stroke="#FFD166" stroke-width="2"/>
+  <text x="450" y="373" text-anchor="middle" font-size="12" font-weight="bold" fill="white">③ KD-Tree Spatial-Vector Matching</text>
+  <text x="450" y="391" text-anchor="middle" font-size="10" fill="#CCE0FF">Novel algorithm bridging 50 µm inter-slice gaps</text>
+  <text x="450" y="407" text-anchor="middle" font-size="10" fill="#CCE0FF">Spatial proximity + orientation consistency · Hungarian assignment</text>
+  <!-- Novel badge -->
+  <rect x="36" y="362" width="86" height="22" rx="6" fill="#FFD166"/>
+  <text x="79" y="377" text-anchor="middle" font-size="9" font-weight="bold" fill="#1B3A6B">Novel Contribution</text>
+
+  <!-- Arrow 4 -->
+  <line x1="450" y1="422" x2="450" y2="446" stroke="#2E5FA3" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Step 4 -->
+  <rect x="270" y="446" width="360" height="62" rx="8" fill="#2E5FA3"/>
+  <text x="450" y="469" text-anchor="middle" font-size="12" font-weight="bold" fill="white">④ 3-D Vascular Graph Construction</text>
+  <text x="450" y="487" text-anchor="middle" font-size="10" fill="#CCE0FF">Graph-theoretic topological validation</text>
+  <text x="450" y="501" text-anchor="middle" font-size="10" fill="#CCE0FF">Branching degree · Connectivity · Continuity</text>
+
+  <!-- Arrow 5 -->
+  <line x1="450" y1="508" x2="450" y2="532" stroke="#2E5FA3" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Output box -->
+  <rect x="310" y="532" width="280" height="64" rx="10" fill="#1B3A6B"/>
+  <text x="450" y="557" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Validated 3-D</text>
+  <text x="450" y="575" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Vascular Network</text>
+  <text x="450" y="591" text-anchor="middle" font-size="10" fill="#AAC4E8">92.4% integration · 100,000+ connections</text>
+
+  <!-- Results sidebar -->
+  <rect x="36" y="430" width="150" height="140" rx="8" fill="white" stroke="#2E5FA3" stroke-width="1.2"/>
+  <text x="111" y="451" text-anchor="middle" font-size="10" font-weight="bold" fill="#1B3A6B">Key Results</text>
+  <line x1="48" y1="457" x2="174" y2="457" stroke="#2E5FA3" stroke-width="0.8"/>
+  <text x="48" y="473" font-size="9.5" fill="#333">Integration rate</text>
+  <text x="174" y="473" text-anchor="end" font-size="9.5" font-weight="bold" fill="#0D6E6E">92.4 %</text>
+  <text x="48" y="490" font-size="9.5" fill="#333">Connections</text>
+  <text x="174" y="490" text-anchor="end" font-size="9.5" font-weight="bold" fill="#0D6E6E">100,000+</text>
+  <text x="48" y="507" font-size="9.5" fill="#333">Branching degree</text>
+  <text x="174" y="507" text-anchor="end" font-size="9.5" font-weight="bold" fill="#0D6E6E">3.26</text>
+  <text x="48" y="524" font-size="9.5" fill="#333">Speed vs manual</text>
+  <text x="174" y="524" text-anchor="end" font-size="9.5" font-weight="bold" fill="#0D6E6E">hrs vs months</text>
+  <text x="48" y="541" font-size="9.5" fill="#333">HPC nodes</text>
+  <text x="174" y="541" text-anchor="end" font-size="9.5" font-weight="bold" fill="#0D6E6E">multi-GPU</text>
+  <text x="48" y="558" font-size="9.5" fill="#333">Topology</text>
+  <text x="174" y="558" text-anchor="end" font-size="9.5" font-weight="bold" fill="#0D6E6E">Validated</text>
+
+  <!-- Stack sidebar -->
+  <rect x="714" y="430" width="150" height="140" rx="8" fill="white" stroke="#2E5FA3" stroke-width="1.2"/>
+  <text x="789" y="451" text-anchor="middle" font-size="10" font-weight="bold" fill="#1B3A6B">Tech Stack</text>
+  <line x1="726" y1="457" x2="852" y2="457" stroke="#2E5FA3" stroke-width="0.8"/>
+  <text x="726" y="473" font-size="9" fill="#333">Deep Learning</text>
+  <text x="726" y="487" font-size="9" fill="#555">PyTorch · 3-D U-Net</text>
+  <text x="726" y="502" font-size="9" fill="#333">HPC / GPU</text>
+  <text x="726" y="516" font-size="9" fill="#555">CUDA · Slurm</text>
+  <text x="726" y="531" font-size="9" fill="#333">Imaging</text>
+  <text x="726" y="545" font-size="9" fill="#555">SimpleITK · NIfTI</text>
+  <text x="726" y="560" font-size="9" fill="#333">Algorithms</text>
+  <text x="726" y="574" font-size="9" fill="#555">KD-Trees · NetworkX</text>
+
+  <!-- Arrow defs -->
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#2E5FA3"/>
+    </marker>
+  </defs>
+
+</svg>
