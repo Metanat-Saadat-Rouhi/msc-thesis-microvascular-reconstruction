@@ -53,7 +53,7 @@ Blood vessels occupy only **0.36% of image pixels** in brightfield histological 
 The key contribution is a **density-aware composite loss function** that switches between three training regimes based on the measured vessel pixel density in each batch. This single design decision accounts for the full 0.688 Dice improvement over the baseline and is the enabling condition for deep learning on this dataset.
 
 <p align="center">
-  <img src="assets/figure4_1_training_curves.png" alt="Training curves: validation Dice over 129 epochs" width="90%"/>
+  <img src="assets/figure4_1_fixed.png" alt="Training curves: validation Dice over 129 epochs" width="90%"/>
 </p>
 
 <p align="center">
@@ -122,7 +122,7 @@ SE blocks address a specific problem unique to this dataset: at 0.36% vessel cov
 ## Ablation Study
 
 <p align="center">
-  <img src="assets/figure4_2_training_comparison.png" alt="Ablation study: comparison of loss functions and architectural choices" width="90%"/>
+  <img src="assets/figure4_2_fixed.png" alt="Ablation study: comparison of loss functions and architectural choices" width="90%"/>
 </p>
 
 | Configuration | Val Dice | vs pipeline |
