@@ -1,6 +1,10 @@
 # Deep Learning Cerebrovascular Segmentation and 3D Reconstruction
 
 <p align="center">
+  <img src="assets/vessel_poster.png" alt="" width="100%"/>
+</p>
+
+<p align="center">
   <img src="assets/snapshot10.png" alt="Complete cerebrovascular network — left hemisphere reconstructed from 1,258 histological sections" width="100%"/>
 </p>
 
