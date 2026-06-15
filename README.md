@@ -1,3 +1,4 @@
+![Complete cerebrovascular network — left hemisphere, 5.9M vertex 3D reconstruction](assets/snapshot10.png)
 # HPC-Accelerated 3-D Reconstruction of Large-Scale Microvascular Networks
 
 > **M.Sc. Thesis** · Bergische Universität Wuppertal · in collaboration with **Forschungszentrum Jülich (INM-1)**  
