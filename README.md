@@ -1,4 +1,7 @@
 # Deep Learning Cerebrovascular Segmentation and 3D Reconstruction
+<p align="center">
+  <img src="assets/ChatGPT Image Jun 15, 2026, 06_40_08 PM.png" alt="Complete cerebrovascular network — left hemisphere reconstructed from 1,258 histological sections" width="100%"/>
+</p>
 
 <p align="center">
   <img src="assets/snapshot10.png" alt="Complete cerebrovascular network — left hemisphere reconstructed from 1,258 histological sections" width="100%"/>
