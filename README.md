@@ -72,6 +72,9 @@ Gigapixel Histology Stack
 | **Processing time** | Hours per tissue block (vs. months manual) |
 
 ![Results overview](assets/results_overview.png)
+![Close-up: individual vessel branching from cortical artery to capillaries](assets/snapshot13.png)
+
+![Colour-coded overlay: each colour = one unique vessel traced across all 1,258 sections](assets/overlay_s0568.png)
 
 ---
 
